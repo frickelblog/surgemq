@@ -54,6 +54,7 @@ func (this *service) processor() {
 			//if err != io.EOF {
 			glog.Errorf("(%s) Error peeking next message size: %v", this.cid(), err)
 			//}
+			
 			return
 		}
 
@@ -62,6 +63,7 @@ func (this *service) processor() {
 			//if err != io.EOF {
 			glog.Errorf("(%s) Error peeking next message: %v", this.cid(), err)
 			//}
+			
 			return
 		}
 
@@ -190,6 +192,12 @@ func (this *service) processIncoming(msg message.Message) error {
 
 func (this *service) processAcked(ackq *sessions.Ackqueue) {
 	for _, ackmsg := range ackq.Acked() {
+			
+		if len(ackmsg.Msgbuf) == 0 || len(ackmsg.Ackbuf) == 0 {
+			glog.Errorf("process/processAcked: Unable to decode new %s as ackmsg Msgbuf buf is %v or ackmsg Ackbuf buf is %v", ackmsg.Mtype, ackmsg.Msgbuf, ackmsg.Ackbuf)
+			continue
+		}
+		
 		// Let's get the messages from the saved message byte slices.
 		msg, err := ackmsg.Mtype.New()
 		if err != nil {

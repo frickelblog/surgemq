@@ -118,7 +118,9 @@ func (this *Client) Connect(uri string, msg *message.ConnectMessage) (err error)
 	}
 
 	p := topics.NewMemProvider()
-	topics.Register(this.svc.sess.ID(), p)
+	if err := topics.Register(this.svc.sess.ID(), p); err != nil {
+		return err
+	}
 
 	this.svc.topicsMgr, err = topics.NewManager(this.svc.sess.ID())
 	if err != nil {

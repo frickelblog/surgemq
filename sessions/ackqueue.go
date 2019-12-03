@@ -128,7 +128,14 @@ func (this *Ackqueue) Wait(msg message.Message, onComplete interface{}) error {
 			State:      message.RESERVED,
 			OnComplete: onComplete,
 		}
-
+		
+		ml := msg.Len()
+		this.ping.Msgbuf = make([]byte, ml)
+		_, err := msg.Encode(this.ping.Msgbuf)
+		if err != nil {
+			return err
+		}
+		
 	default:
 		return errWaitMessage
 	}
@@ -162,6 +169,21 @@ func (this *Ackqueue) Ack(msg message.Message) error {
 			//glog.Debugf("Cannot ack %s message with packet ID %d", msg.Type(), msg.PacketId())
 		}
 
+	/*
+	case message.PINGRESP:
+		if this.ping.Mtype == message.PINGREQ {
+			this.ping.Mtype = message.PINGRESP
+			this.ping.State = message.PINGRESP
+			ml := msg.Len()
+			this.ping.Ackbuf = make([]byte, ml)
+			_, err := msg.Encode(this.ping.Ackbuf)
+			if err != nil {
+				return err
+			}
+			//this.ping.Ackbuf = this.ping.Msgbuf
+		}
+	*/
+	
 	case message.PINGRESP:
 		if this.ping.Mtype == message.PINGREQ {
 			this.ping.Mtype = message.PINGRESP
@@ -173,7 +195,7 @@ func (this *Ackqueue) Ack(msg message.Message) error {
 			}
 			this.ping.Ackbuf = this.ping.Msgbuf
 		}
-
+	
 	default:
 		return errAckMessage
 	}

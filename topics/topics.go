@@ -67,16 +67,18 @@ type TopicsProvider interface {
 	Close() error
 }
 
-func Register(name string, provider TopicsProvider) {
+func Register(name string, provider TopicsProvider) error {
 	if provider == nil {
 		panic("topics: Register provide is nil")
 	}
 
 	if _, dup := providers[name]; dup {
-		panic("topics: Register called twice for provider " + name)
+		return fmt.Errorf("topics: Register called twice for provider %s", name)
 	}
 
 	providers[name] = provider
+	
+	return nil
 }
 
 func Unregister(name string) {
